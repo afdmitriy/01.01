@@ -27,12 +27,12 @@ const AvailableResolutions: string[] = [
 // }
 
 type VideoType = {
-   id?: number; ////
+   id: number; ////
    title: string;
    author: string;
    canBeDownloaded: boolean;
    minAgeRestriction: number | null;
-   createdAt?: string;
+   createdAt: string;
    publicationDate: string;
    availableResolutions: typeof AvailableResolutions;
    //   availableResolutions: AvailableResolutions[];
@@ -200,11 +200,109 @@ app.delete('/videos/:id', (req: Request<Param>, res: Response): void => {
 
 app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
    const id: number = +req.params.id;
+   const videoIndex = videos.findIndex((video) => video.id === id);
 
    const errors: ErrorType = {
       errorsMessages: [],
    };
 
+   if (videoIndex !== -1) {
+      const updatedVideo: Partial<VideoType> = req.body;
+
+      if (updatedVideo.title) {
+         if (
+            typeof updatedVideo.title === 'string' &&
+            updatedVideo.title.trim() &&
+            updatedVideo.title.trim().length > 40
+         ) {
+            videos[videoIndex].title = updatedVideo.title;
+         } else {
+            errors.errorsMessages.push({
+               field: 'title',
+               message: 'Incorrect title',
+            });
+         }
+      }
+
+      if (updatedVideo.author) {
+         if (
+            typeof updatedVideo.author === 'string' &&
+            updatedVideo.author.trim() &&
+            updatedVideo.author.trim().length > 20
+         ) {
+            videos[videoIndex].author = updatedVideo.author;
+         } else {
+            errors.errorsMessages.push({
+               field: 'author',
+               message: 'Incorrect author',
+            });
+         }
+      }
+
+      if (updatedVideo.availableResolutions) {
+         if (
+            Array.isArray(updatedVideo.availableResolutions) &&
+            updatedVideo.availableResolutions.length == 1
+         ) {
+            updatedVideo.availableResolutions.forEach((r) => {
+               if (AvailableResolutions.includes(r)) {
+                  videos[videoIndex].availableResolutions =
+                     updatedVideo.availableResolutions;
+               } else {
+                  errors.errorsMessages.push({
+                     field: 'availableResolutions',
+                     message: 'Incorrect availableResolutions',
+                  });
+               }
+            });
+         }
+      }
+
+      if (updatedVideo.canBeDownloaded) {
+         if (typeof updatedVideo.canBeDownloaded !== 'boolean') {
+            videos[videoIndex].canBeDownloaded = updatedVideo.canBeDownloaded;
+         } else {
+            errors.errorsMessages.push({
+               field: 'canBeDownloaded',
+               message: 'Incorrect canBeDownloaded',
+            });
+         }
+      }
+
+      if (updatedVideo.minAgeRestriction) {
+         if (
+            typeof updatedVideo.minAgeRestriction === 'number' &&
+            updatedVideo.minAgeRestriction < 1 &&
+            updatedVideo.minAgeRestriction > 18
+         ) {
+            videos[videoIndex].minAgeRestriction =
+               updatedVideo.minAgeRestriction;
+         } else {
+            errors.errorsMessages.push({
+               field: 'minAgeRestriction',
+               message: 'Incorrect minAgeRestriction',
+            });
+         }
+      }
+
+      if (updatedVideo.publicationDate) {
+         if (typeof updatedVideo.publicationDate !== 'string') {
+            videos[videoIndex].publicationDate = updatedVideo.publicationDate;
+         } else {
+            errors.errorsMessages.push({
+               field: 'publicationDate',
+               message: 'Incorrect publicationDate',
+            });
+            res.sendStatus(400);
+         }
+      }
+      ///////////////////////////////////////////////////////////////////////////////////////
+
+      res.sendStatus(204);
+   } else {
+      res.sendStatus(404);
+   }
+   //////////////////////////////////////////////////////////////////////////////////////
    let {
       title,
       author,
@@ -245,19 +343,19 @@ app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
       });
    }
 
-   if (Array.isArray(availableResolutions) || availableResolutions.length > 1) {
-      availableResolutions.forEach((r) => {
-         if (!AvailableResolutions.includes(r)) {
-            errors.errorsMessages.push({
-               field: 'availableResolutions',
-               message: 'Incorrect availableResolutions',
-            });
-            return;
-         }
-      });
-   } else {
-      availableResolutions = [];
-   }
+   // if (Array.isArray(availableResolutions) || availableResolutions.length > 1) {
+   //    availableResolutions.forEach((r) => {
+   //       if (!AvailableResolutions.includes(r)) {
+   //          errors.errorsMessages.push({
+   //             field: 'availableResolutions',
+   //             message: 'Incorrect availableResolutions',
+   //          });
+   //          return;
+   //       }
+   //    });
+   // } else {
+   //    availableResolutions = [];
+   // }
 
    if (typeof canBeDownloaded !== 'boolean') {
       errors.errorsMessages.push({
@@ -288,15 +386,6 @@ app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
       res.status(400).send(errors);
       return;
    }
-
-   const newVideo: VideoType = {
-      canBeDownloaded,
-      minAgeRestriction,
-      publicationDate: new Date().toISOString(),
-      title,
-      author,
-      availableResolutions,
-   };
 
    videos.push(newVideo);
 });
