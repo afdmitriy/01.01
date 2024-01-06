@@ -93,7 +93,7 @@ app.get('/videos/:id', (req: Request<Param>, res: Response): void => {
 app.post(
    '/videos',
    (req: RequestWithBody<CreateVideoType>, res: Response): void => {
-      // Кажется, CreateVideoType не используется
+      // как здесь работает <CreateVideoType>?
       const errors: ErrorType = {
          errorsMessages: [],
       };
@@ -198,111 +198,105 @@ app.delete('/videos/:id', (req: Request<Param>, res: Response): void => {
 
 /////////////////////////
 
-app.put(
-   '/videos/:id',
-   (req: Request<Param, CreateVideoType>, res: Response): void => {
-      const id: number = +req.params.id;
+app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
+   const id: number = +req.params.id;
 
-      const errors: ErrorType = {
-         errorsMessages: [],
-      };
+   const errors: ErrorType = {
+      errorsMessages: [],
+   };
 
-      let {
-         title,
-         author,
-         availableResolutions,
-         canBeDownloaded,
-         minAgeRestriction,
-         publicationDate,
-      }: {
-         title: string;
-         author: string;
-         availableResolutions?: string[];
-         canBeDownloaded?: boolean;
-         minAgeRestriction?: number;
-         publicationDate?: string;
-      } = req.body;
+   let {
+      title,
+      author,
+      availableResolutions,
+      canBeDownloaded,
+      minAgeRestriction,
+      publicationDate,
+   }: {
+      title: string;
+      author: string;
+      availableResolutions?: string[];
+      canBeDownloaded?: boolean;
+      minAgeRestriction?: number;
+      publicationDate?: string;
+   } = req.body;
 
-      if (
-         !title ||
-         typeof title !== 'string' ||
-         !title.trim() ||
-         title.trim().length > 40
-      ) {
-         errors.errorsMessages.push({
-            field: 'title',
-            message: 'Incorrect title',
-         });
-      }
-
-      if (
-         !author ||
-         typeof author !== 'string' ||
-         !author.trim() ||
-         author.trim().length > 20
-      ) {
-         errors.errorsMessages.push({
-            field: 'author',
-            message: 'Incorrect author',
-         });
-      }
-
-      if (
-         Array.isArray(availableResolutions) ||
-         availableResolutions.length > 1
-      ) {
-         availableResolutions.forEach((r) => {
-            if (!AvailableResolutions.includes(r)) {
-               errors.errorsMessages.push({
-                  field: 'availableResolutions',
-                  message: 'Incorrect availableResolutions',
-               });
-               return;
-            }
-         });
-      } else {
-         availableResolutions = [];
-      }
-
-      if (typeof canBeDownloaded !== 'boolean') {
-         errors.errorsMessages.push({
-            field: 'canBeDownloaded',
-            message: 'Incorrect canBeDownloaded',
-         });
-      }
-
-      if (
-         typeof minAgeRestriction !== 'number' ||
-         minAgeRestriction < 1 ||
-         minAgeRestriction > 18
-      ) {
-         errors.errorsMessages.push({
-            field: 'minAgeRestriction',
-            message: 'Incorrect minAgeRestriction',
-         });
-      }
-
-      if (typeof publicationDate !== 'string') {
-         errors.errorsMessages.push({
-            field: 'publicationDate',
-            message: 'Incorrect publicationDate',
-         });
-      }
-
-      if (errors.errorsMessages.length) {
-         res.status(400).send(errors);
-         return;
-      }
-
-      const newVideo: VideoType = {
-         canBeDownloaded,
-         minAgeRestriction,
-         publicationDate: new Date().toISOString(),
-         title,
-         author,
-         availableResolutions,
-      };
-
-      videos.push(newVideo);
+   if (
+      !title ||
+      typeof title !== 'string' ||
+      !title.trim() ||
+      title.trim().length > 40
+   ) {
+      errors.errorsMessages.push({
+         field: 'title',
+         message: 'Incorrect title',
+      });
    }
-);
+
+   if (
+      !author ||
+      typeof author !== 'string' ||
+      !author.trim() ||
+      author.trim().length > 20
+   ) {
+      errors.errorsMessages.push({
+         field: 'author',
+         message: 'Incorrect author',
+      });
+   }
+
+   if (Array.isArray(availableResolutions) || availableResolutions.length > 1) {
+      availableResolutions.forEach((r) => {
+         if (!AvailableResolutions.includes(r)) {
+            errors.errorsMessages.push({
+               field: 'availableResolutions',
+               message: 'Incorrect availableResolutions',
+            });
+            return;
+         }
+      });
+   } else {
+      availableResolutions = [];
+   }
+
+   if (typeof canBeDownloaded !== 'boolean') {
+      errors.errorsMessages.push({
+         field: 'canBeDownloaded',
+         message: 'Incorrect canBeDownloaded',
+      });
+   }
+
+   if (
+      typeof minAgeRestriction !== 'number' ||
+      minAgeRestriction < 1 ||
+      minAgeRestriction > 18
+   ) {
+      errors.errorsMessages.push({
+         field: 'minAgeRestriction',
+         message: 'Incorrect minAgeRestriction',
+      });
+   }
+
+   if (typeof publicationDate !== 'string') {
+      errors.errorsMessages.push({
+         field: 'publicationDate',
+         message: 'Incorrect publicationDate',
+      });
+   }
+
+   if (errors.errorsMessages.length) {
+      res.status(400).send(errors);
+      return;
+   }
+
+   const newVideo: VideoType = {
+      canBeDownloaded,
+      minAgeRestriction,
+      publicationDate: new Date().toISOString(),
+      title,
+      author,
+      availableResolutions,
+   };
+
+   videos.push(newVideo);
+});
