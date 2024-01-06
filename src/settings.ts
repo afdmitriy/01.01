@@ -54,7 +54,7 @@ const videos: VideoType[] = [
 type RequestWithBody<B> = Request<unknown, unknown, B, unknown>; // как это работает?
 
 type Param = {
-   id: number;
+   id: string;
 };
 
 type CreateVideoType = {
@@ -247,7 +247,7 @@ app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
             updatedVideo.availableResolutions.forEach((r) => {
                if (AvailableResolutions.includes(r)) {
                   videos[videoIndex].availableResolutions =
-                     updatedVideo.availableResolutions;
+                     updatedVideo.availableResolutions || [];
                } else {
                   errors.errorsMessages.push({
                      field: 'availableResolutions',
@@ -297,95 +297,8 @@ app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
          }
       }
       ///////////////////////////////////////////////////////////////////////////////////////
-
       res.sendStatus(204);
    } else {
       res.sendStatus(404);
    }
-   //////////////////////////////////////////////////////////////////////////////////////
-   let {
-      title,
-      author,
-      availableResolutions,
-      canBeDownloaded,
-      minAgeRestriction,
-      publicationDate,
-   }: {
-      title: string;
-      author: string;
-      availableResolutions?: string[];
-      canBeDownloaded?: boolean;
-      minAgeRestriction?: number;
-      publicationDate?: string;
-   } = req.body;
-
-   if (
-      !title ||
-      typeof title !== 'string' ||
-      !title.trim() ||
-      title.trim().length > 40
-   ) {
-      errors.errorsMessages.push({
-         field: 'title',
-         message: 'Incorrect title',
-      });
-   }
-
-   if (
-      !author ||
-      typeof author !== 'string' ||
-      !author.trim() ||
-      author.trim().length > 20
-   ) {
-      errors.errorsMessages.push({
-         field: 'author',
-         message: 'Incorrect author',
-      });
-   }
-
-   // if (Array.isArray(availableResolutions) || availableResolutions.length > 1) {
-   //    availableResolutions.forEach((r) => {
-   //       if (!AvailableResolutions.includes(r)) {
-   //          errors.errorsMessages.push({
-   //             field: 'availableResolutions',
-   //             message: 'Incorrect availableResolutions',
-   //          });
-   //          return;
-   //       }
-   //    });
-   // } else {
-   //    availableResolutions = [];
-   // }
-
-   if (typeof canBeDownloaded !== 'boolean') {
-      errors.errorsMessages.push({
-         field: 'canBeDownloaded',
-         message: 'Incorrect canBeDownloaded',
-      });
-   }
-
-   if (
-      typeof minAgeRestriction !== 'number' ||
-      minAgeRestriction < 1 ||
-      minAgeRestriction > 18
-   ) {
-      errors.errorsMessages.push({
-         field: 'minAgeRestriction',
-         message: 'Incorrect minAgeRestriction',
-      });
-   }
-
-   if (typeof publicationDate !== 'string') {
-      errors.errorsMessages.push({
-         field: 'publicationDate',
-         message: 'Incorrect publicationDate',
-      });
-   }
-
-   if (errors.errorsMessages.length) {
-      res.status(400).send(errors);
-      return;
-   }
-
-   videos.push(newVideo);
 });
