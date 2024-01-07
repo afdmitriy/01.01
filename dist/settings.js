@@ -42,7 +42,6 @@ exports.app.get('/videos/:id', (req, res) => {
     res.send(video);
 });
 exports.app.post('/videos', (req, res) => {
-    // как здесь работает <CreateVideoType>?
     const errors = {
         errorsMessages: [],
     };
@@ -92,8 +91,8 @@ exports.app.post('/videos', (req, res) => {
         minAgeRestriction: null,
         createdAt: createdAt.toISOString(),
         publicationDate: publicationDate.toISOString(),
-        title, // как переменные добавляются в качестве полей?
-        author, // Здесь используется сокращенный синтаксис для добавления переменных в объект. Если имя переменной совпадает с именем поля, в которое она должна быть добавлена, то можно просто указать имя переменной без дополнительных обозначений. Таким образом, переменные title, author и availableResolutions добавляются в объект newVideo как поля с теми же именами, что и у переменных.
+        title,
+        author,
         availableResolutions,
     };
     videos.push(newVideo);
@@ -205,10 +204,12 @@ exports.app.put('/videos/:id', (req, res) => {
                     field: 'publicationDate',
                     message: 'Incorrect publicationDate',
                 });
-                res.sendStatus(400);
             }
         }
-        ///////////////////////////////////////////////////////////////////////////////////////
+        if (errors.errorsMessages.length) {
+            res.status(400).send(errors);
+            return;
+        }
         res.sendStatus(204);
     }
     else {

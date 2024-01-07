@@ -51,7 +51,7 @@ const videos: VideoType[] = [
    },
 ];
 
-type RequestWithBody<B> = Request<unknown, unknown, B, unknown>; // как это работает?
+type RequestWithBody<B> = Request<unknown, unknown, B, unknown>;
 
 type Param = {
    id: string;
@@ -93,7 +93,6 @@ app.get('/videos/:id', (req: Request<Param>, res: Response): void => {
 app.post(
    '/videos',
    (req: RequestWithBody<CreateVideoType>, res: Response): void => {
-      // как здесь работает <CreateVideoType>?
       const errors: ErrorType = {
          errorsMessages: [],
       };
@@ -159,8 +158,8 @@ app.post(
          minAgeRestriction: null,
          createdAt: createdAt.toISOString(),
          publicationDate: publicationDate.toISOString(),
-         title, // как переменные добавляются в качестве полей?
-         author, // Здесь используется сокращенный синтаксис для добавления переменных в объект. Если имя переменной совпадает с именем поля, в которое она должна быть добавлена, то можно просто указать имя переменной без дополнительных обозначений. Таким образом, переменные title, author и availableResolutions добавляются в объект newVideo как поля с теми же именами, что и у переменных.
+         title,
+         author,
          availableResolutions,
       };
 
@@ -293,10 +292,14 @@ app.put('/videos/:id', (req: Request<Param>, res: Response): void => {
                field: 'publicationDate',
                message: 'Incorrect publicationDate',
             });
-            res.sendStatus(400);
          }
       }
-      ///////////////////////////////////////////////////////////////////////////////////////
+
+      if (errors.errorsMessages.length) {
+         res.status(400).send(errors);
+         return;
+      }
+
       res.sendStatus(204);
    } else {
       res.sendStatus(404);
