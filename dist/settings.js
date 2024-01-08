@@ -18,19 +18,19 @@ const AvailableResolutions = [
     'P2160',
 ];
 const videos = [
-    {
-        id: 0,
-        title: 'string',
-        author: 'string',
-        canBeDownloaded: true,
-        minAgeRestriction: null,
-        createdAt: '2024-01-04T16:54:56.572Z',
-        publicationDate: '2024-01-04T16:54:56.572Z',
-        availableResolutions: ['P144'], // не знаю как через Enum
-    },
+// {
+//    id: 0,
+//    title: 'string',
+//    author: 'string',
+//    canBeDownloaded: true,
+//    minAgeRestriction: null,
+//    createdAt: '2024-01-04T16:54:56.572Z',
+//    publicationDate: '2024-01-04T16:54:56.572Z',
+//    availableResolutions: ['P144'], // не знаю как через Enum
+// },
 ];
 exports.app.get('/videos', (req, res) => {
-    res.send(videos);
+    res.status(200).send(videos);
 });
 exports.app.get('/videos/:id', (req, res) => {
     const id = +req.params.id;
@@ -98,8 +98,9 @@ exports.app.post('/videos', (req, res) => {
     videos.push(newVideo);
     res.status(201).send(newVideo);
 });
-exports.app.delete('./testing/all-data', (req, res) => {
+exports.app.delete('/testing/all-data', (req, res) => {
     videos.length = 0;
+    console.log('All data is deleted');
     res.sendStatus(204);
 });
 exports.app.delete('/videos/:id', (req, res) => {
@@ -130,32 +131,48 @@ exports.app.put('/videos/:id', (req, res) => {
         if (updatedVideo.title) {
             if (typeof updatedVideo.title === 'string' &&
                 updatedVideo.title.trim() &&
-                updatedVideo.title.trim().length > 40) {
+                updatedVideo.title.trim().length < 40) {
                 videos[videoIndex].title = updatedVideo.title;
             }
             else {
                 errors.errorsMessages.push({
-                    field: 'title',
                     message: 'Incorrect title',
+                    field: 'title',
                 });
+                // res.status(400).send(errors);
+                // return;
             }
+        }
+        else {
+            errors.errorsMessages.push({
+                message: 'Incorrect title',
+                field: 'title',
+            });
+            // res.status(400).send(errors);
+            // return;
         }
         if (updatedVideo.author) {
             if (typeof updatedVideo.author === 'string' &&
                 updatedVideo.author.trim() &&
-                updatedVideo.author.trim().length > 20) {
+                updatedVideo.author.trim().length < 20) {
                 videos[videoIndex].author = updatedVideo.author;
             }
             else {
                 errors.errorsMessages.push({
-                    field: 'author',
                     message: 'Incorrect author',
+                    field: 'author',
                 });
             }
         }
+        else {
+            errors.errorsMessages.push({
+                message: 'Incorrect author',
+                field: 'author',
+            });
+        }
         if (updatedVideo.availableResolutions) {
             if (Array.isArray(updatedVideo.availableResolutions) &&
-                updatedVideo.availableResolutions.length == 1) {
+                updatedVideo.availableResolutions.length > 0) {
                 updatedVideo.availableResolutions.forEach((r) => {
                     if (AvailableResolutions.includes(r)) {
                         videos[videoIndex].availableResolutions =
@@ -163,46 +180,46 @@ exports.app.put('/videos/:id', (req, res) => {
                     }
                     else {
                         errors.errorsMessages.push({
-                            field: 'availableResolutions',
                             message: 'Incorrect availableResolutions',
+                            field: 'availableResolutions',
                         });
                     }
                 });
             }
         }
         if (updatedVideo.canBeDownloaded) {
-            if (typeof updatedVideo.canBeDownloaded !== 'boolean') {
+            if (typeof updatedVideo.canBeDownloaded === 'boolean') {
                 videos[videoIndex].canBeDownloaded = updatedVideo.canBeDownloaded;
             }
             else {
                 errors.errorsMessages.push({
-                    field: 'canBeDownloaded',
                     message: 'Incorrect canBeDownloaded',
+                    field: 'canBeDownloaded',
                 });
             }
         }
         if (updatedVideo.minAgeRestriction) {
             if (typeof updatedVideo.minAgeRestriction === 'number' &&
-                updatedVideo.minAgeRestriction < 1 &&
-                updatedVideo.minAgeRestriction > 18) {
+                updatedVideo.minAgeRestriction > 1 &&
+                updatedVideo.minAgeRestriction < 18) {
                 videos[videoIndex].minAgeRestriction =
                     updatedVideo.minAgeRestriction;
             }
             else {
                 errors.errorsMessages.push({
-                    field: 'minAgeRestriction',
                     message: 'Incorrect minAgeRestriction',
+                    field: 'minAgeRestriction',
                 });
             }
         }
         if (updatedVideo.publicationDate) {
-            if (typeof updatedVideo.publicationDate !== 'string') {
+            if (typeof updatedVideo.publicationDate === 'string') {
                 videos[videoIndex].publicationDate = updatedVideo.publicationDate;
             }
             else {
                 errors.errorsMessages.push({
-                    field: 'publicationDate',
                     message: 'Incorrect publicationDate',
+                    field: 'publicationDate',
                 });
             }
         }
